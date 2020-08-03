@@ -3,8 +3,8 @@
  * Este programa recebera uma serie de numeros em sua entrada. 
  * Ao receber um caractere fim de linha ('\n'), deve imprimir na tela o
  * numero de primos que recebeu (2,3,5,7,11 são numeros primos)
- * Cada numero deve ser analisado em um processor diiferente
- * usando 4 processor maximo
+ * Cada numero deve ser analisado em um thread diiferente
+ * usando 4 thread maximo em paralelo
  *Os numeros tem tamanho macimo de 2^64 <=> long long int 
  */
  
@@ -14,7 +14,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-#define WORKERS 4 //numerode threads em paralelo
+#define WORKERS 4 //numero de threads em paralelo
 
 //saber se eh primo
 bool eh_primo(long long int x){
@@ -25,6 +25,7 @@ bool eh_primo(long long int x){
 	for (int i = 2; i < x; i++){
 		if (x % i == 0){
       eh=false;
+	  break;
 		}
 	}
 	return eh;
@@ -33,7 +34,7 @@ bool eh_primo(long long int x){
 pthread_mutex_t trava;
 int primos =0; // varaivel global
 
-void* worker(void *arg) {
+void* funcao_thread(void *arg) {
   long long int *N = (long long int*)(arg);
   long long int M = (*N);
     pthread_mutex_lock(&trava);
@@ -51,7 +52,7 @@ int main(int argc, char **argv) {
   int thread_id[WORKERS];
 
   /* Recuperando numeros */
-	long long int entrada[100];  
+	long long int entrada[1000];  
 	char c; 
 	int e = 0;
 	while(c != '\n'){
@@ -61,31 +62,29 @@ int main(int argc, char **argv) {
 	}
 	int entrada_size = e;
 	
-  /* Identificadores de thread */
-  for (int i=0; i<WORKERS; i++) {
-    thread_id[i] = i;
-  }
-
   /* Disparanto threads */
-  int id=0;
-  for (int i=0; i<entrada_size; i++) {
-	  if( thread_id[id]<WORKERS){
-    pthread_create(&(workers[i]), NULL, worker, &entrada[i]);
-	id ++;
-	  } else{
-		/* Esperando threads */
-		for (int w=0; w<WORKERS; w++) {
-			pthread_join(workers[w], NULL);
+	int id =1;
+	for (int i_entrada = 0; i_entrada < entrada_size; i_entrada++) {
+		//criando a thread
+		pthread_create(&(workers[id]), NULL, funcao_thread, &(entrada[i_entrada])); 
+		if(id <WORKERS){
+			id++;		
+		}else{
+			/*Esperando todas as threads terminarem os processos*/
+			for (int k=0; k<WORKERS; k++) {
+				pthread_join(workers[k], NULL);
+			}
+			id = 0; //volta a usar a primeira thread
+
 		}
-		id=0;
-	  }
-  }
+	}
+
 	/* Esperando threads */
 	for (int i=0; i<WORKERS; i++) {
 		pthread_join(workers[i], NULL);
 	}
 	
-  /* Escrevendo vetor */
+  /* Escrevendo  numero de primos*/
     printf("%d\n", primos);
 
 
