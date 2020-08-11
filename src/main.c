@@ -25,8 +25,9 @@ bool eh_primo(long long int x){
 	for (int i = 2; i < x; i++){
 		if (x % i == 0){
       eh=false;
-	  break;
 		}
+	  break;
+		
 	}
 	return eh;
 }
