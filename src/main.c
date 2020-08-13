@@ -16,21 +16,6 @@
 
 #define WORKERS 4 //numero de threads em paralelo
 
-//saber se eh primo
-bool eh_primo(long long int x){
-	bool eh= true;
-	// 0 e 1 não são primos
-	if(x < 2) eh =false;
-	
-	for (int i = 2; i < x; i++){
-		if (x % i == 0){
-      eh=false;
-	  break;
-		}
-	}
-	return eh;
-}
-
 pthread_mutex_t trava;
 int primos =0; // varaivel global
 
@@ -38,14 +23,18 @@ void* funcao_thread(void *arg) {
   long long int *N = (long long int*)(arg);
   long long int M = (*N);
     pthread_mutex_lock(&trava);
-	
-	if (eh_primo(M))primos++;
-	
+    if(M!=2 && M!=3 && M!=5 && M!=7){   
+      if(M<=1);
+      else if(M%2==0);
+      else if(M%3==0);
+      else if(M%5==0);
+      else if(M%7==0);
+      else primos++;
+    }
+    else primos++;
     pthread_mutex_unlock(&trava);
   return NULL;
 }
-
-
 
 int main(int argc, char **argv) {
   pthread_t workers[WORKERS];
